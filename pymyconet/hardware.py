@@ -155,7 +155,8 @@ def get_hardware_options() -> dict:
         "gpu": {
             "default": "cl",
             "options": {
-                "cl": {"requires": ["pyopencl", "numpy"], "supported": False, "path": "", "check": check_opencl},
+                "cl": {"requires": ["pyopencl", "numpy"], "supported": True, "path": "gpu_cl", "check": check_opencl},
+                "cl-low_mem": {"requires": ["pyopencl", "numpy"], "supported": False, "path": "gpu_cl_low_mem", "check": check_opencl},
                 "tensorflow": {"requires": ["tensorflow", "numpy"], "supported": False, "path": "", "check": check_tensorflow},
                 "pytorch": {"requires": ["pytorch", "numpy"], "supported": False, "path": ""},
                 "cuda": {"requires": ["cuda-python", "numpy"], "supported": False, "path": "", "check": check_cuda},

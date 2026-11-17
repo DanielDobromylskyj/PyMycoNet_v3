@@ -19,8 +19,12 @@ class Network:
 
         self.__generic_layers = layout
         self.__layers: list[Layer] = self.__load_core_layers(auto_gen_weights)
+        self.__hook_all_layers()
         if self.__verbose: print("[Network] Loaded core")
 
+    def __hook_all_layers(self):
+        for layer in self.__layers:
+            layer.hook(self)
 
     def grab_layer(self, i):
         return self.__layers[i]
@@ -46,7 +50,11 @@ class Network:
 
     def _forward(self, input_values: DataBuffer) -> DataBuffer:
         working_values = input_values
-        for layer in self.__layers:
+
+        for i, layer in enumerate(self.__layers):
+            if i + 1 < len(self.__layers):
+                self.__layers[i + 1].is_next()
+
             working_values = layer.forward(working_values)
 
         return working_values
@@ -55,7 +63,10 @@ class Network:
         data = [input_values]
         working_values = input_values
 
-        for layer in self.__layers:
+        for i, layer in enumerate(self.__layers):
+            if i+1 < len(self.__layers):
+                self.__layers[i+1].is_next()
+
             working_values = layer.forward(working_values)
             data.append(working_values)
 
@@ -221,6 +232,9 @@ class Network:
                 "layers": layers
             }))
 
-
+    def release(self):
+        """ Releases the network and its layers resources back to the system """
+        for layer in self.__layers:
+            layer.release()
 
 

@@ -11,6 +11,11 @@ class DenseLayer(Layer):
         self.input_dim = input_dim
         self.output_dim = output_dim
 
+        if generate:
+            self.__weights, self.__biases = generate_values(input_dim, output_dim)
+        else:
+            self.__weights, self.__biases = np.ndarray((1,)), np.ndarray((1,))
+
     def initialize_core(self, core_class, generate=True):
         loaded = core_class(self.input_dim, self.output_dim, generate=generate)
 
@@ -24,16 +29,10 @@ class DenseLayer(Layer):
         self.__biases = biases
 
     def get_weights(self) -> np.ndarray:
-        raise NotImplementedError
+        return self.__weights
 
     def get_biases(self) -> np.ndarray:
-        raise NotImplementedError
-
-    def compare_to(self, dense_layer):
-        return {
-            "weights": np.array_equal(self.get_weights(), dense_layer.get_weights()),
-            "biases": np.array_equal(self.get_biases(), dense_layer.get_biases())
-        }
+        return self.__biases
 
     @staticmethod
     def deserialize(metadata: dict, serialized_data: bytes):
@@ -42,8 +41,15 @@ class DenseLayer(Layer):
 
     @staticmethod
     def load(zip_file, layer):
-        """ Loads and returns a dense layer / self """
-        raise NotImplementedError
+        blob = zip_file.read(layer['blob'])
+        meta = layer['meta']
+
+        new = DenseLayer(meta['input_dim'], meta["output_dim"], generate=False)
+        values = new.deserialize(meta, blob)
+
+        new.set_values(*values)
+
+        return new
 
     def serialize(self):
         value_meta, blob = self.serialize_data({

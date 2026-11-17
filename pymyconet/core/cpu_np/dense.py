@@ -6,13 +6,8 @@ from pymyconet.buffer import DataBuffer
 
 class DenseLayer(GenericDenseLayer):
     def __init__(self, input_dim: int, output_dim: int, generate=True):
-        super().__init__(input_dim, output_dim)
+        super().__init__(input_dim, output_dim, generate=generate)
 
-        if generate is True:
-            from ..generic.dense import generate_values
-            self.__weights, self.__biases = generate_values(input_dim, output_dim)
-        else:
-            self.__weights, self.__biases = None, None
 
     def forward(self, input_values: DataBuffer):
         raw_values = input_values.get_buffer()
@@ -59,16 +54,3 @@ class DenseLayer(GenericDenseLayer):
 
         self.__weights += weight_grad
         self.__biases += bias_grad
-
-
-    @staticmethod
-    def load(zip_file, layer):
-        blob = zip_file.read(layer['blob'])
-        meta = layer['meta']
-
-        new = DenseLayer(meta['input_dim'], meta["output_dim"], generate=False)
-        values = new.deserialize(meta, blob)
-
-        new.set_values(*values)
-
-        return new

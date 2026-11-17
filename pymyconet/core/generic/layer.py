@@ -2,6 +2,8 @@ import io
 import numpy as np
 
 class Layer:
+    network: "network.Network"
+
     def initialize_core(self, core_class, generate=True):
         raise NotImplementedError
 
@@ -49,3 +51,17 @@ class Layer:
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}()"
+
+    def hook(self, net):
+        self.network = net
+
+        self.on_hook()
+
+    def on_hook(self):
+        pass
+
+    def release(self):
+        pass
+
+    def is_next(self):
+        pass
