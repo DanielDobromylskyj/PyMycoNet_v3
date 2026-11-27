@@ -39,9 +39,7 @@ __kernel void forward(
             int input_y = input_y_offset + ky;
 
             // Validate weight index
-            if (weight_index < 0 ||
-                weight_index >= filter_count * kernel_height * kernel_width)
-            {
+            if (weight_index < 0 || weight_index >= filter_count * kernel_height * kernel_width) {
                 return;
             }
 
@@ -151,7 +149,6 @@ __kernel void backward(
 
             float input_value = 0.0f;
             if (!(input_x < 0 || input_y < 0 || input_x >= input_width || input_y >= input_height)) {
-
                 if (input_index < 0 || input_index >= input_width * input_height) {
                     continue; // Skip, Its out of bounds, Somehow? This should never get reached?
                 }
@@ -264,66 +261,4 @@ __kernel void reduce_next_errors(
 
     int output_index = input_y * input_width + input_x;
     reduced_values[output_index] = sum;
-}
-
-__kernel void reduce_next_errors_debug(
-    __global const float* unreduced_values,
-    __global float* reduced_values,
-
-    int input_width,
-    int input_height,
-
-    int output_width,
-    int output_height,
-
-    int kernel_width,
-    int kernel_height,
-
-    int step_x,
-    int step_y,
-
-    int filter_count
-) {
-    int input_x = get_global_id(0);
-    int input_y = get_global_id(1);
-
-    if (input_x >= input_width || input_y >= input_height)
-        return;
-
-    float sum = 0.0f;
-
-    for (int oy = 0; oy < output_height; oy++) {
-        for (int ox = 0; ox < output_width; ox++) {
-
-            int spatial_index = oy * output_width + ox;
-
-            int base_offset =
-                spatial_index * filter_count * kernel_height * kernel_width;
-
-            int origin_x = ox * step_x;
-            int origin_y = oy * step_y;
-
-            for (int ky = 0; ky < kernel_height; ky++) {
-                for (int kx = 0; kx < kernel_width; kx++) {
-
-                    if (origin_x + kx != input_x ||
-                        origin_y + ky != input_y)
-                        continue;
-
-                    for (int f = 0; f < filter_count; f++) {
-
-                        int index =
-                            base_offset
-                            + f * kernel_height * kernel_width
-                            + ky * kernel_width
-                            + kx;
-
-                        sum += unreduced_values[index];
-                    }
-                }
-            }
-        }
-    }
-
-    reduced_values[input_y * input_width + input_x] = sum;
 }
