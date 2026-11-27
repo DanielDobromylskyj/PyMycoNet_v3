@@ -1,31 +1,33 @@
 import io
 import numpy as np
 
+import inspect
+
 class Layer:
     network: "network.Network"
 
     def initialize_core(self, core_class, generate=True):
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__} -> {inspect.currentframe().f_code.co_name}(...)")
 
     def forward(self, input_values):
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__} -> {inspect.currentframe().f_code.co_name}(...)")
 
     def backward(self, input_buffer, previous_error_buffer, learning_rate: float) -> dict:
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__} -> {inspect.currentframe().f_code.co_name}(...)")
 
     def apply_gradients(self, *args):
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__} -> {inspect.currentframe().f_code.co_name}(...)")
 
     @staticmethod
     def load(zip_file, layer):
-        raise NotImplementedError
+        raise NotImplementedError(f"GenericLayer -> {inspect.currentframe().f_code.co_name}(...)")
 
     def serialize(self) -> tuple[dict, bytes]:
-        raise NotImplementedError
+        raise NotImplementedError(f"{self.__class__} -> {inspect.currentframe().f_code.co_name}(...)")
 
     @staticmethod
     def deserialize(metadata: dict, serialized_data: bytes):
-        raise NotImplementedError
+        raise NotImplementedError(f"GenericLayer -> {inspect.currentframe().f_code.co_name}(...)")
 
     @staticmethod
     def serialize_data(data: dict[str, np.ndarray]):
@@ -55,10 +57,9 @@ class Layer:
     def hook(self, net):
         self.network = net
 
-        self.on_hook()
+        if hasattr(self, "on_hook"):
+            self.on_hook()
 
-    def on_hook(self):
-        pass
 
     def release(self):
         pass

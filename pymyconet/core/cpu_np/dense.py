@@ -12,14 +12,27 @@ class DenseLayer(GenericDenseLayer):
     def forward(self, input_values: DataBuffer):
         raw_values = input_values.get_buffer()
         if not isinstance(raw_values, np.ndarray): raise TypeError("Input must be a numpy array")
-        if raw_values.shape[0] != self.input_dim: raise ValueError(f"Bad Input Shape! {raw_values.shape[0]} != {self.input_dim}")
+
+        if raw_values.shape[0] != self.input_dim:
+            raw_values = raw_values.flatten()
+
+            if raw_values.shape[0] != self.input_dim:
+                raise ValueError(f"Bad Input Shape! {raw_values.shape[0]} != {self.input_dim}")
+
 
         outputs = self.__weights @ raw_values + self.__biases
+
         return DataBuffer(outputs)
 
     def backward(self, input_buffer: DataBuffer, previous_error_buffer: DataBuffer, learning_rate: float):
         previous_errors = previous_error_buffer.get_buffer()
         inputs = input_buffer.get_buffer()
+
+        if len(previous_errors.shape) != 1:
+            previous_errors.flatten()
+
+        if len(inputs.shape) != 1:
+            inputs = inputs.flatten()
 
         bias_gradients = np.empty((self.output_dim,), dtype=np.float32)
         weight_gradients = np.empty((self.output_dim, self.input_dim), dtype=np.float32)

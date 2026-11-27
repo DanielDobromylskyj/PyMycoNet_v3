@@ -90,6 +90,7 @@ class Network:
     def _backward(self, layer_inputs: list[DataBuffer], error_values: DataBuffer, learning_rate: float) -> dict[str, list[DataBuffer]]:
         weight_gradients = []
         bias_gradients = []
+        debug_error_grads = []
 
         for i in range(len(self.__layers)-1, -1, -1):
             layer = self.__layers[i]
@@ -109,9 +110,14 @@ class Network:
                 values["bias_gradients"]
             )
 
+            debug_error_grads.append(
+                values["next_errors"]
+            )
+
         return {
             "weight_gradients": weight_gradients,
-            "bias_gradients": bias_gradients
+            "bias_gradients": bias_gradients,
+            "debug_next_errors": debug_error_grads
         }
 
 
